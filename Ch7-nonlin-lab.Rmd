@@ -15,13 +15,28 @@ jupyter:
 ---
 
 # Lab: Non-linear Modeling
-In this assignment we use the ch7-nonlin-lab as a template to further investigate the wage dataset from the ISLR2 library.
+In this assignment we use the ch7-nonlin-lab as a template to further investigate the wage dataset from the ISLR2 library. The aim of this project is to re-analyze the wage data divided into two sub-data using jobclass as a classification variable
 
 ```{r chunk1}
 library(ISLR2)
 attach(Wage)
 ```
 
+In this chunk we convert job class using numerical encoding into a clearly defined 1,2 classification variable. Where 1 is industrial and 2 is information
+```{r chunk 1a}
+head(Wage$jobclass)
+class<- c(Wage$jobclass)
+jobclass_factor <- factor(class, levels = c("1. Industrial", "2. Information"), labels = c(1, 2))
+jobclass_num <- as.numeric(jobclass_factor)
+head(jobclass_num)
+
+```
+After numerical encoding has been completed the original jobclass variable was replaced by the numerical version of jobclass to be used for the remainder of the project.
+```{r chunk 1b}
+Wage$jobclass<- jobclass_num
+head(Wage$jobclass)
+```
+Now the wage dataset is ready to be used for this project. 
 
 ## Polynomial Regression and Step Functions
 \def\caret{{^}}
