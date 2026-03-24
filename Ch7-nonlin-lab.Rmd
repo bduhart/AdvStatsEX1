@@ -1,5 +1,5 @@
 ---
-title: "Ch7-nonlin-lab"
+title: "Exam 1 Group 2"
 jupyter:
   jupytext:
     formats: ipynb,Rmd
@@ -15,11 +15,7 @@ jupyter:
 ---
 
 # Lab: Non-linear Modeling
-In this lab, we re-analyze the `Wage` data considered in the
-examples throughout this chapter, in order to illustrate the fact that
-many of the complex non-linear fitting procedures discussed  can
-be easily implemented in `R`.  We begin by loading the
-`ISLR2` library, which contains the data.
+In this assignment we use the ch7-nonlin-lab as a template to further investigate the wage dataset from the ISLR2 library.
 
 ```{r chunk1}
 library(ISLR2)
