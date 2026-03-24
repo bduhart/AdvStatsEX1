@@ -15,6 +15,8 @@ jupyter:
 ---
 ##Section 1 - Brianna Duhart -Finished ##
 # EX1 Group 2
+#Note: Seperated the data into subsets for a collection of variables where job classification =1 and job classification =2. Then performed all of the analysis in lines 1-157 on both subsets to gain an understanding of the model with a focus on each subset. Use Wage_1 for job classification =1 dataset or Wage_2 for job classification =2 dataset. Completely finished with my section, please let me know if I should make any edits to my code or explainations. 
+
 In this assignment we use the ch7-nonlin-lab as a template to further investigate the wage dataset from the ISLR2 library. The aim of this project is to re-analyze the wage data divided into two sub-data using jobclass as a classification variable
 
 ```{r chunk1}
