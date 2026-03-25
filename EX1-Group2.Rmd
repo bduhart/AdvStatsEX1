@@ -62,7 +62,7 @@ coef(summary(fit))
 #fit for information job classification
 fit_ <- lm(wage ~ poly(age, 4), data = Wage_2)
 print("2nd subset of Wage Data looking at Information Job class")
-coef(summary(fit_2))
+coef(summary(fit_))
 ```
 
 The lm() function was used to predict the value of the outcome variable wage using a 4th degree polynomial in the age variable. Poly() was used to create a 4th degree polynomial which is returned as a matrix whose columns are a linear combination of the variables age, age^2, age^3, and age^4 using orthogonal values. This is important to condense the formula with powers of age. 
@@ -73,7 +73,7 @@ fit2 <- lm(wage ~ poly(age, 4, raw = T), data = Wage_1)
 coef(summary(fit2))
 
 fit_2 <- lm(wage ~ poly(age, 4, raw = T), data = Wage_2)
-coef(summary(fit_2b))
+coef(summary(fit_2))
 ```
 
 This is another way to calculate the linear model fit using a 4th degree polynomial but instead of using the orthogonal set of basis functions the raw=T uses the raw/standard values. 
