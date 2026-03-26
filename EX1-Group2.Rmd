@@ -105,9 +105,9 @@ This is a more condensed approach using the cbind() function to build a matrix f
 ```{r chunk6}
 age_1 <-Wage_1$age
 age_2<-Wage_2$age
-agelims <- range(age_1)
-age.grid <- seq(from = agelims[1], to = agelims[2])
-preds <- predict(fit, newdata = list(age_1 = age.grid),
+agelims_1 <- range(age_1)
+age.grid_1 <- seq(from = agelims_1[1], to = agelims_1[2])
+preds <- predict(fit, newdata = list(age = age.grid_1),
     se = TRUE)
 se.bands1 <- cbind(preds$fit + 2 * preds$se.fit,
     preds$fit - 2 * preds$se.fit)
@@ -115,7 +115,7 @@ se.bands1 <- cbind(preds$fit + 2 * preds$se.fit,
 
 agelims_2 <- range(age_2)
 age.grid_2 <- seq(from = agelims_2[1], to = agelims_2[2])
-preds_2 <- predict(fit_, newdata = list(age_2 = age.grid_2),
+preds_2 <- predict(fit_, newdata = list(age= age.grid_2),
     se = TRUE)
 se.bands_2 <- cbind(preds_2$fit + 2 * preds_2$se.fit,
     preds_2$fit - 2 * preds_2$se.fit)
@@ -129,10 +129,10 @@ wage_2 <- Wage_2$wage
 
 par(mfrow = c(1, 2), mar = c(4.5, 4.5, 1, 1),
     oma = c(0, 0, 4, 0))
-plot(age_1, wage_1, xlim = agelims, cex = .5, col = "darkgrey")
+plot(age_1, wage_1, xlim = agelims_1, cex = .5, col = "darkgrey")
 title("JobClass = 1, Degree-4 Polynomial", outer = T)
-lines(age.grid, preds$fit, lwd = 2, col = "blue")
-matlines(age.grid, se.bands1, lwd = 1, col = "blue", lty = 3)
+lines(age.grid_1, preds$fit, lwd = 2, col = "blue")
+matlines(age.grid_1, se.bands1, lwd = 1, col = "blue", lty = 3)
 
 
 ```
@@ -148,7 +148,7 @@ matlines(age.grid_2, se.bands_2, lwd = 1, col = "blue", lty = 3)
 
 Mar and oma are arguments to the par() function that enable changes to be made to the margins of the plots and the title function was used to create a title for each plot. We show that the fitted values obtained are identical within the same job classification group despite using an orthogonal set of basis functions and raw functions. 
 ```{r chunk8}
-preds2_1 <- predict(fit2, newdata = list(age_1 = age.grid),
+preds2_1 <- predict(fit2, newdata = list(age_1 = age.grid_1),
     se = TRUE)
 max(abs(preds$fit - preds2_1$fit))
 
