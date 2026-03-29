@@ -158,7 +158,7 @@ max(abs(preds_2$fit - preds2_2$fit))
 ```
 We saw a very small difference 10^-11 between the two models using orthogonal versus raw basis functions within the same job classification group models. This suggests that there is a negligible difference between the two choices so the fitted values can be considered identical.
 
-##ANOVA Section - Yuelin##
+## ANOVA Section - Yuelin - Finished ##
 In order to choose the appropriate polynomial degree, we will compare models via hypothesis tests, starting from a linear model, then increasing model complexity to degree-5 polynomials, to decide the simplest model to explain the relationship between `wage` and `age` for each job class. 
 We use the `anova()` function to get the value of the F-test in \define{analysis of variance} (ANOVA), to compare nested polynomial models and see whether those higher-degree terms improve model fit by reducing prediction error (RSS) significantly. If the p-value for the null hypothesis is smaller than our desired significance level, adding polynomial terms improves the model performance. Otherwise, a larger p-value tells us that we fail to reject the null hypothesis, and the simpler model is sufficient. This allows us to select the simplest adequate model without overfitting. To perform the `anova()` function, we need to make sure these models are *nested* - the predictors in the simpler model $\mathcal{M}_1$ must be a subset of the predictors in the complex model $\mathcal{M}_2$. Here, we fit five different models to compare the p-values of the simpler model to the complex model by sequence.
 
