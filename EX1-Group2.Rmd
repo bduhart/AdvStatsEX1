@@ -159,89 +159,84 @@ max(abs(preds_2$fit - preds2_2$fit))
 We saw a very small difference 10^-11 between the two models using orthogonal versus raw basis functions within the same job classification group models. This suggests that there is a negligible difference between the two choices so the fitted values can be considered identical.
 
 ##ANOVA Section - Yuelin##
-In performing a polynomial regression we must decide on the degree of
-the polynomial to use. One way to do this is by using hypothesis
-tests. We now fit models ranging from linear to a degree-5 polynomial
-and seek to determine the simplest model which is sufficient to
-explain the relationship 
-between `wage` and `age`. We use the
-`anova()` function, which performs an \define{analysis of
-  variance} (ANOVA, using an F-test) in order to test the null
-hypothesis that a model $\mathcal{M}_1$ is sufficient to explain the
-data against the alternative hypothesis that a more complex model
-$\mathcal{M}_2$ is required. In order to use the `anova()`
-function, $\mathcal{M}_1$ and $\mathcal{M}_2$ must be *nested*
-models: the predictors in $\mathcal{M}_1$ must be a subset of the
-predictors in $\mathcal{M}_2$. In this case, we fit five different
-models and sequentially compare the simpler model to the more complex
-model.
+In order to choose the appropriate polynomial degree, we will compare models via hypothesis tests, starting from a linear model, then increasing model complexity to degree-5 polynomials, to decide the simplest model to explain the relationship between `wage` and `age` for each job class. 
+We use the `anova()` function to get the value of the F-test in \define{analysis of variance} (ANOVA), to compare nested polynomial models and see whether those higher-degree terms improve model fit by reducing prediction error (RSS) significantly. If the p-value for the null hypothesis is smaller than our desired significance level, adding polynomial terms improves the model performance. Otherwise, a larger p-value tells us that we fail to reject the null hypothesis, and the simpler model is sufficient. This allows us to select the simplest adequate model without overfitting. To perform the `anova()` function, we need to make sure these models are *nested* - the predictors in the simpler model $\mathcal{M}_1$ must be a subset of the predictors in the complex model $\mathcal{M}_2$. Here, we fit five different models to compare the p-values of the simpler model to the complex model by sequence.
 
 ```{r chunk9}
-fit.1 <- lm(wage ~ age, data = Wage)
-fit.2 <- lm(wage ~ poly(age, 2), data = Wage)
-fit.3 <- lm(wage ~ poly(age, 3), data = Wage)
-fit.4 <- lm(wage ~ poly(age, 4), data = Wage)
-fit.5 <- lm(wage ~ poly(age, 5), data = Wage)
-anova(fit.1, fit.2, fit.3, fit.4, fit.5)
+#For the Industrial group (JobClass = 1):
+fit1_1 <- lm(wage ~ age, data = Wage_1)
+fit2_1 <- lm(wage ~ poly(age, 2), data = Wage_1)
+fit3_1 <- lm(wage ~ poly(age, 3), data = Wage_1)
+fit4_1 <- lm(wage ~ poly(age, 4), data = Wage_1)
+fit5_1 <- lm(wage ~ poly(age, 5), data = Wage_1)
+anova(fit1_1, fit2_1, fit3_1, fit4_1, fit5_1)
+
+#For the Information group (JobClass = 2):
+fit1_2 <- lm(wage ~ age, data = Wage_2)
+fit2_2 <- lm(wage ~ poly(age, 2), data = Wage_2)
+fit3_2 <- lm(wage ~ poly(age, 3), data = Wage_2)
+fit4_2 <- lm(wage ~ poly(age, 4), data = Wage_2)
+fit5_2 <- lm(wage ~ poly(age, 5), data = Wage_2)
+anova(fit1_2, fit2_2, fit3_2, fit4_2, fit5_2)
 ```
 
 
-The p-value comparing the linear `Model 1` to the quadratic
-`Model 2` is essentially zero ($<$$10^{-15}$), indicating that a linear
-fit is not sufficient. Similarly the p-value comparing the quadratic
- `Model 2` to the cubic `Model 3` is very low ($0.0017$), so
-the quadratic fit is also insufficient. The p-value comparing the
-cubic and degree-4 polynomials, `Model 3` and `Model 4`, is approximately $5\,\%$
-while the degree-5 polynomial `Model 5` seems unnecessary because its
-p-value is $0.37$. Hence, either a cubic or a quartic
-polynomial appear to provide a reasonable fit to the data, but lower-
-or higher-order models are not justified.
+For the $Industrial group (JobClass = 1)$, the p-value comparing the linear model (Model 1) to the quadratic model (Model 2) is extremely small ($<$$2e-16$), indicating that a linear model is not sufficient. The p-values for adding higher polynomial terms (Model 3-5) are all greater than $0.05$, suggesting that additional polynomial terms of degree more than 2 do not improve the model fit significantly. Thus, a $quadratic (degree 2) model is sufficient for this $Industrial group$.
+For the $Information group (JobClass = 2)$, both the quadratic term ($1.272e-12$) and the cubic term ($0.0039$) improve the model significantly. This indicates that neither a linear nor a quadratic model is sufficient. The p-values for the higher polynomial terms (degree 4 and 5) are greater than $0.05$, suggesting they do not improve the model fit. Thus, a $cubic (degree 3) model is sufficient$ for this $Information group$.
+Different job classes show different levels of nonlinearity in the wage-age relationship, which requires different polynomial degrees for adequate modeling.
 
-
-In this case, instead of using the `anova()` function, we could have obtained these p-values more succinctly by exploiting the fact that `poly()` creates orthogonal polynomials.
+The `poly()` function can create orthogonal polynomials; we can obtain the p-values fast by using it instead of the `anova()` function.
 
 ```{r chunk10}
-coef(summary(fit.5))
+#For the Industrial group (JobClass = 1):
+coef(summary(fit5_1))
+
+#For the Information group (JobClass = 2):
+coef(summary(fit5_2))
 ```
 
-Notice that the p-values are the same, and in fact the square of the  $t$-statistics are equal to the F-statistics from the `anova()` function; for example:
+We can see that the p-values are the same, and the square of the  $t$-statistics are the same as the F-statistics from the `anova()` function; for example:
 
 ```{r chunk11}
-(-11.983)^2
+(-2.891646)^2
 ```
 
-However, the ANOVA method works whether or not we used orthogonal polynomials; it also works when we have other terms in the model as well. For example, we can use `anova()` to compare these three models:
+Except for whether or not we used orthogonal polynomials, ANOVA also works when we have other predictors in the model as well. This allows us to evaluate whether high-order polynomial terms of $age$, in our case, still improve the model after adding other variables. Here is the example:
 
 ```{r chunk12}
-fit.1 <- lm(wage ~ education + age, data = Wage)
-fit.2 <- lm(wage ~ education + poly(age, 2), data = Wage)
-fit.3 <- lm(wage ~ education + poly(age, 3), data = Wage)
-anova(fit.1, fit.2, fit.3)
+#For the Industrial group (JobClass = 1):
+fit.1_1 <- lm(wage ~ education + age, data = Wage_1)
+fit.2_1 <- lm(wage ~ education + poly(age, 2), data = Wage_1)
+fit.3_1 <- lm(wage ~ education + poly(age, 3), data = Wage_1)
+anova(fit.1_1, fit.2_1, fit.3_1)
+
+#For the Information group (JobClass = 2):
+fit.1_2 <- lm(wage ~ education + age, data = Wage_2)
+fit.2_2 <- lm(wage ~ education + poly(age, 2), data = Wage_2)
+fit.3_2 <- lm(wage ~ education + poly(age, 3), data = Wage_2)
+anova(fit.1_2, fit.2_2, fit.3_2)
 ```
 
+This analysis allows us to determine whether adding quadratic or cubic terms of `age` provides a significant improvement in model fit after controlling for `education`.
+For the $Industrial group$, higher-order terms more than degree 2 are not significant, indicating that a quadratic model remains sufficient.
+For the $Information group$, the cubic term still provides a significant improvement, suggesting a degree 3 polynomial is sufficient.
+Overall, this demonstrates that the conclusion about the polynomial degree remains stable even when adding more predictors to the model.
 
-As an alternative to using hypothesis tests and ANOVA, we could choose the polynomial degree using  cross-validation, as discussed in Chapter 5.
-
-Next we consider the task of predicting whether an individual earns more than $$250{,}000$ per year. We proceed much as before, except that first we create the appropriate response vector, and then apply the `glm()` function using `family = "binomial"` in order to fit a polynomial logistic regression model.
+Next we consider predicting whether an individual earns more than $$250{,}000$ per year. We follow a similar approach as before, but define a binary response variable using `I(wage > 250)` and fit polynomial logistic regression models for each job class. Based on the ANOVA results above, we use a degree-2 polynomial for the Industrial group and a degree-3 polynomial for the Information group.
 
 ```{r chunk13}
-fit <- glm(I(wage > 250) ~ poly(age, 4), data = Wage,
-    family = binomial)
+#For the Industrial group (JobClass = 1):
+fit_logit_1 <- glm(I(wage > 250) ~ poly(age, 2),
+                   data = Wage_1, family = binomial)
+
+#For the Information group (JobClass = 2):
+fit_logit_2 <- glm(I(wage > 250) ~ poly(age, 3),
+                   data = Wage_2, family = binomial)
 ```
 
+The `I(wage > 250)` creates a binary response variable. Values greater than 250 are coded as 1 for `TRUE` and others as 0 for `FALSE`. This setting will fit the `glm()` function.
 
-Note that we again use the wrapper `I()` to create this binary response variable on the fly. The expression `wage > 250` evaluates to a logical variable containing `TRUE`s and `FALSE`s, which `glm()` coerces to binary by setting the `TRUE`s to 1 and the `FALSE`s to 0.
-
-Once again, we make predictions using the `predict()` function.
-
-```{r chunk14}
-preds <- predict(fit, newdata = list(age = age.grid), se = T)
-```
-
-However, calculating the confidence intervals is slightly more involved than in the linear regression case.
-The default prediction type for a `glm()` model
-is `type = "link"`, which is what we use here.  This means we get
-predictions for the *logit* , or log-odds: that is, we have fit a model of the form
+The default prediction type in `glm()` is `type = "link"`. To obtain the confidence intervals for $\Pr(Y=1|X)$, we transform the log odds scale we got from the *logit* 
 \[
 \log\left(\frac{\Pr(Y=1|X)}{1-\Pr(Y=1|X)}\right)=X\beta,
 \]
@@ -251,78 +246,136 @@ predictions for the *logit* , or log-odds: that is, we have fit a model of the f
 \]
 
 ```{r chunk15}
-pfit <- exp(preds$fit) / (1 + exp(preds$fit))
-se.bands.logit <- cbind(preds$fit + 2 * preds$se.fit,
-    preds$fit - 2 * preds$se.fit)
-se.bands <- exp(se.bands.logit) / (1 + exp(se.bands.logit))
+#For the Industrial group (JobClass = 1):
+preds_1 <- predict(fit_logit_1, newdata = list(age = age.grid_1), se = TRUE)
+pfit_1 <- exp(preds_1$fit) / (1 + exp(preds_1$fit))
+se.bands.logit_1 <- cbind(preds_1$fit + 2 * preds_1$se.fit,
+                          preds_1$fit - 2 * preds_1$se.fit)
+prob.bands_1 <- exp(se.bands.logit_1) / (1 + exp(se.bands.logit_1))
+
+#For the Information group (JobClass = 2):
+preds_2 <- predict(fit_logit_2, newdata = list(age = age.grid_2), se = TRUE)
+pfit_2 <- exp(preds_2$fit) / (1 + exp(preds_2$fit))
+se.bands.logit_2 <- cbind(preds_2$fit + 2 * preds_2$se.fit,
+                          preds_2$fit - 2 * preds_2$se.fit)
+prob.bands_2 <- exp(se.bands.logit_2) / (1 + exp(se.bands.logit_2))
 ```
 
-Note that we could have directly computed the probabilities by selecting the `type = "response"` option in the `predict()` function.
+Although we could compute the predicted probabilities directly by selecting the `type = "response"` in the `predict()` function, we do not use it when obtaining confidence intervals.
 
 ```{r chunk16}
-preds <- predict(fit, newdata = list(age = age.grid),
-    type = "response", se = T)
+#For the Industrial group (JobClass = 1):
+preds_1 <- predict(fit_logit_1, newdata = list(age = age.grid_1),
+                   type = "response", se = TRUE)
+
+#For the Information group (JobClass = 2):
+preds_2 <- predict(fit_logit_2, newdata = list(age = age.grid_2),
+                   type = "response", se = TRUE)
 ```
 
-However, the corresponding confidence intervals would not have been sensible because we would end up with negative probabilities!
+Because the standard errors returned by `glm()` are calculated on the logit (link) scale, not on the probability scale. Directly computing the confidence intervals using these values after transformation will lead to invalid results, such as probabilities outside [0, 1] range. So, we compute confidence intervals on the logit scale, then transform them to probabilities to ensure all predicted values and intervals remain in the valid range.
 
-Finally, the right-hand plot from Figure 7.1 was made as follows:
+Finally, the right-hand plots were made as follows:
 
 ```{r chunk17}
-plot(age, I(wage > 250), xlim = agelims, type = "n",
-    ylim = c(0, .2))
-points(jitter(age), I((wage > 250) / 5), cex = .5, pch = "|", col = "darkgrey")
-lines(age.grid, pfit, lwd = 2, col = "blue")
-matlines(age.grid, se.bands, lwd = 1, col = "blue", lty = 3)
+par(mfrow = c(1, 2))
+
+#For the Industrial group (JobClass = 1):
+plot(age_1, I(wage_1 > 250), xlim = agelims_1, type = "n",
+     ylim = c(0, .2), main = "Industrial",
+     xlab = "age", ylab = "Pr(wage > 250)")
+points(jitter(age_1), I((wage_1 > 250)/5),
+       cex = .5, pch = "|", col = "darkgrey")
+lines(age.grid_1, pfit_1, col = "blue", lwd = 2)
+matlines(age.grid_1, prob.bands_1, col = "blue", lty = 3)
+
+#For the Information group (JobClass = 2):
+plot(age_2, I(wage_2 > 250), xlim = agelims_2, type = "n",
+     ylim = c(0, .2), main = "Information",
+     xlab = "age", ylab = "Pr(wage > 250)")
+points(jitter(age_2), I((wage_2 > 250)/5),
+       cex = .5, pch = "|", col = "darkgrey")
+lines(age.grid_2, pfit_2, col = "blue", lwd = 2)
+matlines(age.grid_2, prob.bands_2, col = "blue", lty = 3)
 ```
 
-We have drawn  the `age` values corresponding to the observations with `wage` values above $250$ as gray marks on the top of the plot, and those with `wage` values below $250$ are shown as gray marks on the bottom of the plot. We used
-the `jitter()` function to jitter the `age` values a bit so that observations with the same `age` value do not cover each other up. This is often called a .
+In the plots, the gray points on the top are those `wage` more than $250$, those `wage` less than $250$ are the gray points on the bottom. The `jitter()` function is used here to jitter the `age` values to distinct observations with the same `age` value.
 
-In order to fit a step function, as discussed in Section 7.2, we use the `cut()` function.
+For the  $Industrial group$, the probability remains low across all ages and shows only a mild nonlinear pattern. There is a slight increase around middle age, followed by a decline, indicating that high wages are relatively rare in this group and not that strongly dependent on age. This pattern is consistent with the quadratic model selected earlier.
+For the $Information group$, the probability of earning a high wage increases with age, then declines after middle age. Compared with the Industrial group, the overall probability is higher and shows a clearer nonlinear pattern. This demonstrates the use of the cubic model earlier.
+
+Although the Industrial group and information group are modeled by the quadratic and cubic polynomial, now, as an alternative nonlinear modeling approach, we fit $step functions$ for each job class in order to compare a piecewise-constant fit with the smoother polynomial models. The same number of intervals is used for both groups for comparability.
+
+To fit a step function, we divide $age$ into intervals using the `cut()` function, then fit separate models for each job class.
 
 ```{r chunk18}
-table(cut(age, 4))
-fit <- lm(wage ~ cut(age, 4), data = Wage)
-coef(summary(fit))
+#For the Industrial group (JobClass = 1):
+table(cut(age_1, 4))
+fit_step_1 <- lm(wage ~ cut(age, 4), data = Wage_1)
+coef(summary(fit_step_1))
+
+#For the Information group (JobClass = 2):
+table(cut(age_2, 4))
+fit_step_2 <- lm(wage ~ cut(age, 4), data = Wage_2)
+coef(summary(fit_step_2))
 ```
 
-Here `cut()` automatically picked the cutpoints at $33.5$, $49$, and $64.5$~years of age. We could also have specified our own cutpoints directly using the `breaks` option.
-The function `cut()` returns an ordered categorical variable ; the `lm()` function then creates a set of dummy variables for use in the regression. The `age < 33.5` category is left out, so the intercept coefficient of $$94{,}160$ can be interpreted as the average salary for those under $33.5$~years of age, and the other coefficients can be interpreted as the average additional salary for those in the other age groups.
-We can produce predictions and plots just as we did in the case of the polynomial fit.
+The `cut()` function automatically selects cutoff points that divide the data into 4 groups. It picked the cutoff points at $33.5$, $49$, $64.5$, and $80.1$~years of age. We could also create our own cutoff points directly using the `breaks` option.
+The function `cut()` orders a categorical variable; then the `lm()` function creates a set of dummy variables in the regression. The `< 33.5` in the age category is left out. 
+For $Industrial group$, the average salary for those nder $33.5 years of age is the intercept coefficient of $$87{,}458$, and the other coefficients are the additional salary for those in the other age groups, in average. The result of p-values indicate that the second and third age groups (33.5-49 and 49-64.5) have significant average wages, compared to the baseline age group (<=33.5), the oldest age group (64.5-80.1) does not have significant difference from the baseline.
+For the $Information group$, similarly, the two middle age groups (33.5-49 and 49-64.5) have significant higher wages compared to the baseline age group, in average. The oldest age group does not have significant difference from the baseline.
+Overall, from both job classes, wages tend to reach to a peak at the middle age groups and then become variable at older ages. The significance in the oldest group also suggests higher uncertainty in that age range.
+
+Comparing to polynomial models, step functions provide a simpler, piecewise approximation of the age and wage relationship. They can show general trends but lack smoothness and may not represent the underlying pattern, especially for the Information group where the relationship is more complex.
 
 
 
-In order to fit regression splines in `R`, we use the `splines` library.
-In Section 7.4, we saw that regression
-splines can be fit by constructing an appropriate matrix of basis functions.
-The
- `bs()` function generates the entire matrix of basis functions for splines with the specified set of knots. By default, cubic splines are produced.
-Fitting `wage` to `age` using a regression spline is simple:
+Now, we use the `splines` library to fit regression splines to obtain a smoother fit.
+We use the `bs()` function to generate the entire matrix of basis functions to fit regression splines with the specified set of knots. The default cubic splines is using to fit `wage` to `age` for each job class:
 
 ```{r chunk19}
 library(splines)
-fit <- lm(wage ~ bs(age, knots = c(25, 40, 60)), data = Wage)
-pred <- predict(fit, newdata = list(age = age.grid), se = T)
-plot(age, wage, col = "gray")
-lines(age.grid, pred$fit, lwd = 2)
-lines(age.grid, pred$fit + 2 * pred$se, lty = "dashed")
-lines(age.grid, pred$fit - 2 * pred$se, lty = "dashed")
+par(mfrow = c(1, 2))
+
+#For the Industrial group (JobClass = 1):
+fit_bs_1 <- lm(wage ~ bs(age, knots = c(25, 40, 60)), data = Wage_1)
+pred_bs_1 <- predict(fit_bs_1, newdata = list(age = age.grid_1), se = TRUE)
+plot(age_1, wage_1, col = "gray", main = "Industrial",
+     xlab = "age", ylab = "wage")
+lines(age.grid_1, pred_bs_1$fit, lwd = 2)
+lines(age.grid_1, pred_bs_1$fit + 2 * pred_bs_1$se, lty = "dashed")
+lines(age.grid_1, pred_bs_1$fit - 2 * pred_bs_1$se, lty = "dashed")
+
+#For the Information group (JobClass = 2):
+fit_bs_2 <- lm(wage ~ bs(age, knots = c(25, 40, 60)), data = Wage_2)
+pred_bs_2 <- predict(fit_bs_2, newdata = list(age = age.grid_2), se = TRUE)
+plot(age_2, wage_2, col = "gray", main = "Information",
+     xlab = "age", ylab = "wage")
+lines(age.grid_2, pred_bs_2$fit, lwd = 2)
+lines(age.grid_2, pred_bs_2$fit + 2 * pred_bs_2$se, lty = "dashed")
+lines(age.grid_2, pred_bs_2$fit - 2 * pred_bs_2$se, lty = "dashed")
 ```
 
-Here we have prespecified knots at ages $25$, $40$, and $60$. This produces a spline with six basis functions. (Recall that a cubic spline with three knots has seven degrees of freedom; these degrees of freedom are used up by an intercept, plus six basis functions.) We could also use the `df` option to produce a spline with knots at uniform quantiles
-of the data.
+We set up the knots at ages $25$, $40$, and $60$ for both job classes, in order to follow the original lab and ensure that spline models for the two groups are comparable directly. This produces a spline with six basis functions. 
+We can also use the `df` option to create a spline with three knots at the same quantiles of the data. Because a cubic spline starts with four degrees of freedom, and each knot adds one more degree of freedom, a cubic spline with three knots has 7 degrees of freedom. Here, when we use `df = 6`, R selects the knot locations automatically to achieve that level of flexibility.
 
 ```{r chunk20}
-dim(bs(age, knots = c(25, 40, 60)))
-dim(bs(age, df = 6))
-attr(bs(age, df = 6), "knots")
+#For the Industrial group (JobClass = 1):
+dim(bs(age_1, knots = c(25, 40, 60)))
+dim(bs(age_1, df = 6))
+attr(bs(age_1, df = 6), "knots")
+
+#For the Information group (JobClass = 2):
+dim(bs(age_2, knots = c(25, 40, 60)))
+dim(bs(age_2, df = 6))
+attr(bs(age_2, df = 6), "knots")
 ```
 
-In this case `R` chooses knots at ages $33.8, 42.0$, and $51.0$, which correspond to the 25th, 50th, and 75th percentiles of `age`. The function `bs()` also has a `degree` argument, so we can fit splines of any degree, rather than the default degree of 3 (which yields a cubic spline).  
+For the $Industrial group$, `R` chooses knots at ages $32, 41$, and $50$ at 25th, 50th, and 75th percentiles of `age`. And for the $Information group$, it chooses knots at ages $35, 43$, and $51$ at the same percentiles of age. The differences indicate there is variation in the age groups between the two job classes. Same as the previous, the results show that the $Industrial group$ has a smoother and simpler pattern, while the $Information group$ has a more curved pattern. This also indicates that there is a stronger nonlinear relationship between age and wage.
+The `bs()` function has a `degree` argument also, so we can fit splines of any degree to control flexibility.
 
-In order to instead fit a natural spline, we use the `ns()` function. 
-Here we fit a natural spline with four degrees of freedom.
+We use the `ns()` function to fit a natural spline. 
+For each job class, we fit a natural spline with four degrees of freedom.
 
 ## Section 3- Srinivasa Reddy ##
 ```{r chunk21}
